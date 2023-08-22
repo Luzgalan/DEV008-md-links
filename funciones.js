@@ -13,11 +13,11 @@ import axios from 'axios'
  * @param {*} route  ruta relativa o absoluta
  * @returns {*}  ruta absoluta
  */
+
 export function routeAbsoluted(route) {
   if (path.isAbsolute(route)) { // Verifica si la ruta es absolutas
     return route
   } else {
-    console.log(chalk.bgGreen.black('Ruta absoluta ====>', path.resolve(route)))
     return path.resolve(route)
   }
 }
@@ -53,9 +53,10 @@ export function isFile(route) {
   if (stats.isFile()) {
     return true;
   }
-  else if (stats.isDirectory()) {
+  else {
     return false
   }
+
 }
 
 
@@ -70,16 +71,30 @@ export function isFile(route) {
  */
 export function filesInDirectory(route) {
   let arrayFiles = [];
-  const files = fs.readdirSync(route, "utf-8");//trae los nombres de los archivos que estan en los directorios
-  files.forEach((file) => {
-    const newRoute = path.join(route, file);
-    const statsNew = fs.statSync(newRoute);
-    if (statsNew.isFile()) {
-      arrayFiles.push(newRoute);
-    }
-  });
+
+  function exploreDirectory(currentRoute) {
+    const files = fs.readdirSync(currentRoute, "utf-8");
+    files.forEach((file) => {
+      const newRoute = path.join(currentRoute, file);
+      const statsNew = fs.statSync(newRoute);
+      if (statsNew.isFile()) {
+        arrayFiles.push(newRoute);
+      } else {
+        exploreDirectory(newRoute); // Llamada recursiva para explorar subdirectorios
+      }
+    });
+  }
+
+  exploreDirectory(route); // Iniciar la exploración desde la ruta principal
   return arrayFiles;
 }
+
+
+
+
+
+
+
 
 
 /**
@@ -92,7 +107,6 @@ export function filesInDirectory(route) {
  * @returns {*} array de archivos .md unicamente
  */
 export function filterMD(arrayFiles) {
-  console.log(chalk.bgYellow('archivos antes de filtrar'))
   return arrayFiles.filter(file => path.extname(file) === '.md');
 }
 
@@ -109,9 +123,9 @@ export function filterMD(arrayFiles) {
  */
 export function fileToStringArray(arrayFiles) {
   const allFiles = [];
-  arrayFiles.forEach((file) => {//Recorremos cada uno de los archivos
-    const content = fs.readFileSync(file, 'utf-8')//leer el archivo
-    allFiles.push({ filePath: file, content: content })
+  arrayFiles.forEach((pathFile) => {//Recorremos cada uno de los archivos
+    const content = fs.readFileSync(pathFile, 'utf-8')//leer el archivo
+    allFiles.push({ filePath: pathFile, content: content })
   });
   return allFiles
 };
@@ -132,12 +146,11 @@ export function searchLinks(stringArray) {
     if (ArrayMatches) { // Aca estan todos los links encontrados [texto](enlace) en un array
       ArrayMatches.forEach((linkMatch) => {//Recorremos cada uno de los links
         const matchParts = linkMatch.match(/\[([^\]]+)\]\(([^)]+)\)/); //parte en dos el link para traer el contenido y la url
-
-        if (matchParts) {
-          const text = matchParts[1]; // Texto entre corchetes
-          const link = matchParts[2]; // Enlace entre paréntesis
-          links.push({ file: file.filePath, href: link, text: text, }); // Pushea los objetos { filePath, text, link }
-        }
+        // if (matchParts) {
+        const text = matchParts[1]; // Texto entre corchetes
+        const link = matchParts[2]; // Enlace entre paréntesis
+        links.push({ file: file.filePath, href: link, text: text, }); // Pushea los objetos { filePath, text, link }
+        // }
       });
     }
   });
@@ -154,27 +167,59 @@ export function searchLinks(stringArray) {
  * @returns {Array.<{file: string,  href: string, text: string, status: number, mensaje: string}>}
  */
 export const axiosPeticion = (arryLinks) => {
-  const arrayPromises = arryLinks.map((obj) => {
+  const arrayPromises = arryLinks.map((item) => {
     return axios
-      .get(obj.href)
-      .then((response) => {
-        obj.status = response.status
-        obj.mensaje = response.statusText
-        return obj
+      .get(item.href)
+      .then((response) => { // status 200
+        item.status = response.status
+        item.mensaje = response.statusText
+        return item
       })
       .catch((err) => {
-        if (err.response) {
-          obj.status = err.response.status;
-          obj.mensaje = err.response.statusText
-        } else {
-          obj.status = 404
-          obj.mensaje = 'Not found'
+        if (err.response) {// 300, 400, 500
+          item.status = err.response.status;
+          item.mensaje = err.response.statusText
+        } else { //uNDEFINED
+          item.status = 404
+          item.mensaje = 'Not found'
         }
-        return obj
+        return item
       });
   });
   return Promise.all(arrayPromises)
 }
 
 
+
+/**
+ * retorna las estadisitcas de los links
+ * @date 21/8/2023 - 22:01:21
+ * @author Luz Vazquez
+ *
+ * @export
+ * @param {Array.<{file: string,  href: string, text: string}>}  arrayLinks
+ * @returns {{ total: number; unique: number; }}
+ */
+export function stats(arrayLinks) {
+  const setUniques = new Set();  //set es un tipo de dato que nos ayuda almacenar valores unicos 
+  arrayLinks.forEach(item => setUniques.add(item.href));
+  return { total: arrayLinks.length, unique: setUniques.size }
+}
+
+
+/**
+ * retorna las estadisitca y cuantos son validos
+ * @date 21/8/2023 - 22:02:38
+ * @author Luz Vazquez
+ *
+ * @export
+ * @param {Array.<{file: string,  href: string, text: string, status: number, mensaje: string}>} arrayLinks
+ * @returns {{ total: number; unique: number; broken: number; }}
+ */
+export function statsValidate(arrayLinks) {
+  const setUniques = new Set();  //set es un tipo de dato que nos ayuda almacenar valores unicos 
+  arrayLinks.forEach(item => setUniques.add(item.href));
+  const broken = arrayLinks.filter(item => item.status !== 200)
+  return { total: arrayLinks.length, unique: setUniques.size, broken: broken.length }
+}
 
