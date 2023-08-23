@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import { axiosPeticion, fileToStringArray, filesInDirectory, filterMD, isFile, routeAbsoluted, routeValid, searchLinks, stats, statsValidate } from "./funciones.js";
 
-export const mdLinks = (path, options) => {
+export function mdLinks(path, options) {
   return new Promise((resolve, reject) => {
     const routeAbsoute = routeAbsoluted(path);
 
@@ -22,6 +22,7 @@ export const mdLinks = (path, options) => {
     if (arrayFilesMd.length === 0) reject('No hay archivos md ')
 
     let fileString = fileToStringArray(arrayFilesMd);
+
 
     const linkKs = searchLinks(fileString)// VALIDATE FALSE
 
@@ -46,11 +47,3 @@ export const mdLinks = (path, options) => {
 
   });
 };
-
-mdLinks("./pruebas", { stats: false, validate: true })
-  .then(response => {
-    console.log(response)
-  })
-  .catch(error => {
-    console.log(chalk.red(error))
-  });

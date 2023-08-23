@@ -93,10 +93,6 @@ export function filesInDirectory(route) {
 
 
 
-
-
-
-
 /**
  * Funcion para filtar los archivos .md 
  * @date 1/8/2023 - 21:26:48
@@ -121,6 +117,8 @@ export function filterMD(arrayFiles) {
  * @param {*} arrayFiles
  * @returns {Array.<{filePath: string, content: string}>} - Un array de objetos con la ruta y el contenido de cada archivo.
  */
+
+
 export function fileToStringArray(arrayFiles) {
   const allFiles = [];
   arrayFiles.forEach((pathFile) => {//Recorremos cada uno de los archivos
@@ -159,7 +157,7 @@ export function searchLinks(stringArray) {
 
 
 /**
- * Description placeholder
+ * funcion para las peticiones http con axios
  * @date 15/8/2023 - 20:50:23
  * @author Luz Vazquez
  *
