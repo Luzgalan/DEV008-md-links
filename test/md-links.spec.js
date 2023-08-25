@@ -99,6 +99,7 @@ describe('Test axiosPeticion', () => {
     expect(typeof axiosPeticion).toBe('function');
   });
   it('deberia retornar un array de objeto que contenga las propiedades de status y mensaje', async () => {
+
     expect(await axiosPeticion(links)).toEqual(axiosResponse)
 
   });

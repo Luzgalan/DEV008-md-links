@@ -1,8 +1,15 @@
 {
-  "name": "md-links",
+  "name": "luzvg-md-links",
+  "author": {
+    "name": "Luz maria",
+    "email": "vgluzmaria96@gmail.com",
+    "url": "https://github.com/Luzgalan"
+  },
+  "description": "Markdown links",
+  "repository": "https://github.com/Luzgalan/DEV008-md-links",
   "version": "1.0.0",
   "bin": {
-    "md-links": "cli.js"
+    "md-links": "./cli.js"
   },
   "engines": {
     "node": ">=16.x"
