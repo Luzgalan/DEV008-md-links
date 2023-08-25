@@ -48,9 +48,13 @@ if (cli.input[0] == undefined) {
           }
         })
       } else {
-        for (const key in response) {
-          console.log(key + ': ' + response[key]);
-
+        if (cli.flags.validate === true) {
+          console.log(chalk.bgBlue('Total:'), response.total)
+          console.log(chalk.bgBlackBright('Unique:'), response.unique)
+          console.log(chalk.bgRed('Broken:'), response.broken)
+        } else {
+          console.log(chalk.bgBlue('Total:'), response.total)
+          console.log(chalk.bgMagenta('Unique:'), response.unique)
         }
       }
     })
