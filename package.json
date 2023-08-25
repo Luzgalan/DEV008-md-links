@@ -7,7 +7,7 @@
   },
   "description": "Markdown links",
   "repository": "https://github.com/Luzgalan/DEV008-md-links",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "bin": {
     "md-links": "./cli.js"
   },
